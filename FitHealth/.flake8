@@ -1,0 +1,13 @@
+[flake8]
+# Ignore specific error codes (F401 is unused imports)
+extend-ignore = F401, E501, W292, E302, E305, E303, E305, E306, E501
+
+# E501 is the "line too long" error, which is another notoriously annoying one.
+
+# Exclude directories you don't want it to check at all
+exclude =
+    .git,
+    __pycache__,
+    migrations,
+    venv,
+    env
