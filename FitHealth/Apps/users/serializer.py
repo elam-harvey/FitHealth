@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['user', 'goal', 'current_weight', 'target_weight', 'height', 'age', 'gender', 'activity_level', 'injuries', 'medical_conditions']
+        fields = ['user', 'goal', 'current_weight', 'target_weight', 'height', 'age', 'gender', 'activity_level', 'medical_conditions']
 
 class UserSettingsSerializer(serializers.ModelSerializer):
     class Meta:
