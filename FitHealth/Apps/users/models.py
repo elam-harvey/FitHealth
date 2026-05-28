@@ -3,14 +3,17 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)
-    confirm_password = models.CharField(max_length=255)
     is_premium = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(auto_now_add=True)
 
+    # tell django to use the email to log in 
+    USERNAME_FIELD = 'email'
+
+    # tell django that the username field is not required
+    REQUIRED_FIELDS = ['username']
+
+    def __str__(self):
+        return self.email 
 
 class UserProfile(models.Model):
     class GoalChoices(models.TextChoices):
@@ -42,7 +45,7 @@ class UserProfile(models.Model):
     medical_conditions = models.TextField(blank=True)
     
     def __str__(self):
-        return f"{self.username} - {self.goal}"
+        return f"{self.user.email} - {self.goal}"
     
     # to implement
     # subscriptions = models.ManyToManyField('Subscription', blank=True)
