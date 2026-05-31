@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Meal(models.Model):
-    image = models.ImageField(upload_to='meal_images/')
+    image = models.ImageField(upload_to='meal_images/', null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
     calories = models.FloatField()
