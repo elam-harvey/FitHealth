@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'Apps.AI',
     'Apps.meals',
     'Apps.workouts',
+    'Apps.community',
     'rest_framework_simplejwt.token_blacklist',
 ]
 

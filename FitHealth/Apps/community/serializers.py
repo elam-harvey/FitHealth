@@ -1,0 +1,32 @@
+from rest_framework import serializers
+from .models import Post, Comment
+
+class PostSerializer(serializers.ModelSerializer):
+    likes_count = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
+
+    # this will be used to tell the frontend if the post is liked
+    is_liked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
+    
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request is None or not request.user.is_authenticated:
+            return False
+        
+        # check if the authenticated user has liked the post
+        return obj.likes.filter(id=request.user.id).exists()
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
