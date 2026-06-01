@@ -34,14 +34,12 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     goal = models.CharField(max_length=20, choices=GoalChoices.choices)
-    current_weight = models.FloatField()
-    target_weight = models.FloatField()
-    height = models.FloatField()
-    age = models.IntegerField()
-    activity_level = models.CharField(max_length=20, choices=ActivityChoices.choices)
-    
+    current_weight = models.FloatField(null=True, blank=True)
+    target_weight = models.FloatField(null=True, blank=True)
+    height = models.FloatField(null=True, blank=True)
+    age = models.IntegerField(null=True, blank=True)
+    activity_level = models.CharField(max_length=20, choices=ActivityChoices.choices, null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GenderChoices.choices)
-    activity_level = models.CharField(max_length=20, choices=ActivityChoices.choices)
     medical_conditions = models.TextField(blank=True)
     
     def __str__(self):

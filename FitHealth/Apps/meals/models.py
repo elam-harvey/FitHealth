@@ -14,6 +14,7 @@ class Meal(models.Model):
 
 # stores the meal plans created for users, and the meals that are part of those plans. 
 class MealPlan(models.Model):
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='meal_plans', null=True, blank=True)
     name = models.CharField(max_length=255)
     meals = models.ManyToManyField(Meal, related_name='meal_plans')
 

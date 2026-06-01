@@ -27,6 +27,10 @@ urlpatterns = [
     path('api/', include('Apps.meals.urls')),
     # Workouts URLs
     path('api/', include('Apps.workouts.urls')),
+    # Community URLs
+    path('api/', include('Apps.community.urls')),
+    # AI Coach URLs
+    path('api/', include('Apps.AI.urls')),
     # Swagger URLs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(), name='schema-docs'),

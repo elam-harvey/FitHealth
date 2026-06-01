@@ -14,22 +14,19 @@ class MealViewSet(viewsets.ReadOnlyModelViewSet):
 
 class MealPlanViewSet(viewsets.ModelViewSet):
     serializer_class = MealPlanSerializer
-    # include the premium write permisson
     permission_classes = [IsAuthenticated, IsPremiumOrReadOnly]
 
-    # Override get_queryset to filter meal plans by the authenticated user
     def get_queryset(self):
-        # This ensures that users only see their own meal plans
         return MealPlan.objects.filter(user=self.request.user)
     
-    # Automatically associate the meal plan with the authenticated user on creation
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class MealPlanItemViewSet(viewsets.ModelViewSet):
     serializer_class = MealPlanItemSerializer
     permission_classes = [IsAuthenticated, IsPremiumOrReadOnly]
 
-    # filter meal plan items by the authenticated user's meal plans
     def get_queryset(self):
+        # It hops from MealPlanItem -> MealPlan -> User
         return MealPlanItem.objects.filter(meal_plan__user=self.request.user)

@@ -1,6 +1,9 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
-# Create your models here.
+
+User = get_user_model()
+
 class Workout(models.Model):
     image = models.ImageField(upload_to='workout_images/')
     video = models.FileField(upload_to='workout_videos/')
@@ -15,6 +18,7 @@ class Workout(models.Model):
         return f"{self.name} - {self.description}"
 
 class WorkoutPlan(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workout_plans', null=True, blank=True)
     name = models.CharField(max_length=255)
     workouts = models.ManyToManyField(Workout, related_name='workout_plans')
 
