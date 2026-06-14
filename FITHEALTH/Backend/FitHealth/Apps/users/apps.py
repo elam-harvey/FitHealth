@@ -6,4 +6,4 @@ class UsersConfig(AppConfig):
     name = "Apps.users"
 
     def ready(self):
-        import FITHEALTH.Backend.FitHealth.Apps.users.signals
+        import Apps.users.signals

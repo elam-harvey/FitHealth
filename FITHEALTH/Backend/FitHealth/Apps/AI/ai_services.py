@@ -1,9 +1,9 @@
 from django.conf import settings
 from google import genai
 from google.genai import types
-from FITHEALTH.Backend.FitHealth.Apps.workouts.models import Workout, WorkoutPlan, WorkoutPlanItem
-from FITHEALTH.Backend.FitHealth.Apps.meals.models import Meal, MealPlan, MealPlanItem
-from FITHEALTH.Backend.FitHealth.Apps.users.models import UserProfile
+from Apps.workouts.models import Workout, WorkoutPlan, WorkoutPlanItem
+from Apps.meals.models import Meal, MealPlan, MealPlanItem
+from Apps.users.models import UserProfile
 
 def update_user_profile_metrics(user, current_weight:float=None, target_weight:float=None, goal: str=None) -> str:
     """Update the user's profile with the latest information so as to be able to tweak the plans"""

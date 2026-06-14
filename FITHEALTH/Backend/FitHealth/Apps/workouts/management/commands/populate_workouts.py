@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from FITHEALTH.Backend.FitHealth.Apps.workouts.models import Workout
+from Apps.workouts.models import Workout
 
 class Command(BaseCommand):
     """Command to populate the database with sample workout data."""

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from FITHEALTH.Backend.FitHealth.Apps.meals.models import Meal
+from Apps.meals.models import Meal
 
 
 class Command(BaseCommand):

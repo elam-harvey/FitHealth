@@ -5,10 +5,10 @@ from rest_framework import  status
 import jwt
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
-from FITHEALTH.Backend.FitHealth.Apps.users.models import User
+from Apps.users.models import User
 from .models import Register, Login
 from rest_framework.views import APIView
-from FITHEALTH.Backend.FitHealth.Apps.users.serializer import UserSerializer
+from Apps.users.serializer import UserSerializer
 
 # Create your views here.
 

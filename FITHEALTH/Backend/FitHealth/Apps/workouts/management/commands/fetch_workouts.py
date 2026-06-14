@@ -1,6 +1,6 @@
 import requests
 from django.core.management.base import BaseCommand
-from FITHEALTH.Backend.FitHealth.Apps.workouts.models import Workout
+from Apps.workouts.models import Workout
 from django.conf import settings
 
 

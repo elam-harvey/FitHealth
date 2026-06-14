@@ -1,5 +1,5 @@
 from rest_framework.permissions import IsAuthenticated
-from FITHEALTH.Backend.FitHealth.Apps.meals.permissions import IsPremiumOrReadOnly
+from Apps.meals.permissions import IsPremiumOrReadOnly
 from .models import Workout, WorkoutPlan, WorkoutPlanItem
 from .serializer import WorkoutSerializer, WorkoutPlanSerializer, WorkoutPlanItemSerializer
 from rest_framework import viewsets
@@ -11,6 +11,7 @@ class WorkoutViewSet(viewsets.ModelViewSet):
     serializer_class = WorkoutSerializer
 
 class WorkoutPlanViewSet(viewsets.ModelViewSet):
+    queryset = WorkoutPlan.objects.all()
     permission_classes = [IsAuthenticated, IsPremiumOrReadOnly]
     serializer_class = WorkoutPlanSerializer
 
@@ -22,6 +23,7 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 class WorkoutPlanItemViewSet(viewsets.ModelViewSet):
+    queryset = WorkoutPlanItem.objects.all()
     permission_classes = [IsAuthenticated, IsPremiumOrReadOnly]
     serializer_class = WorkoutPlanItemSerializer
 

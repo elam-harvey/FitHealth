@@ -20,17 +20,17 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path('admin/', admin.site.urls),
     # User URLs
-    path('', include('Apps.users.urls')),
+    path('api/users', include('Apps.users.urls')),
     # Authentication URLs
-    path('auth/', include('Apps.authentication.urls')),
+    path('api/auth/', include('Apps.authentication.urls')),
     # Meals URLs
-    path('api/', include('Apps.meals.urls')),
+    path('api/meals/', include('Apps.meals.urls')),
     # Workouts URLs
-    path('api/', include('Apps.workouts.urls')),
+    path('api/workouts/', include('Apps.workouts.urls')),
     # Community URLs
-    path('api/', include('Apps.community.urls')),
+    path('api/community/', include('Apps.community.urls')),
     # AI Coach URLs
-    path('api/', include('Apps.AI.urls')),
+    path('api/ai', include('Apps.AI.urls')),
     # Swagger URLs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(), name='schema-docs'),

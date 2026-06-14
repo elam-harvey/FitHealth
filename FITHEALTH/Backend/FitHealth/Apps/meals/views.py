@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from FITHEALTH.Backend.FitHealth.Apps.meals.permissions import IsPremiumOrReadOnly
+from Apps.meals.permissions import IsPremiumOrReadOnly
 from .models import Meal, MealPlan, MealPlanItem
 from .serializer import MealSerializer, MealPlanSerializer, MealPlanItemSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -13,6 +13,7 @@ class MealViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
 class MealPlanViewSet(viewsets.ModelViewSet):
+    queryset = MealPlan.objects.all()
     serializer_class = MealPlanSerializer
     permission_classes = [IsAuthenticated, IsPremiumOrReadOnly]
 
@@ -24,6 +25,7 @@ class MealPlanViewSet(viewsets.ModelViewSet):
 
 
 class MealPlanItemViewSet(viewsets.ModelViewSet):
+    queryset = MealPlanItem.objects.all()
     serializer_class = MealPlanItemSerializer
     permission_classes = [IsAuthenticated, IsPremiumOrReadOnly]
 

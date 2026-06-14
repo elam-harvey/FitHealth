@@ -9,6 +9,7 @@ from .serializers import AICoachRequestSerializer
 
 class AICoachViewset(viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AICoachRequestSerializer
 
     @extend_schema(
         request=AICoachRequestSerializer,
@@ -18,7 +19,7 @@ class AICoachViewset(viewsets.GenericViewSet):
 
     def create(self, request):
         """Handle POST requests to generate coaching responses."""
-        serializer = AICoachRequestSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

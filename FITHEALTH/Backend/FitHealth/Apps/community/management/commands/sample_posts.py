@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from FITHEALTH.Backend.FitHealth.Apps.community.models import Post, Comment
+from Apps.community.models import Post, Comment
 from django.contrib.auth import get_user_model
 
 
