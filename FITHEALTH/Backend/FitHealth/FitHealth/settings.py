@@ -14,12 +14,15 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import dotenv
+from cloudinary.utils import cloudinary_url
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
-dotenv.load_dotenv()
+dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -54,10 +57,13 @@ INSTALLED_APPS = [
     'Apps.workouts',
     'Apps.community',
     'rest_framework_simplejwt.token_blacklist',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -91,10 +97,16 @@ WSGI_APPLICATION = 'FitHealth.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# settings.py
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -135,8 +147,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# URL path for the browser to access media files
-MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = 'media/'
 
 # File system path where media files will be stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -199,3 +212,20 @@ _FRAMEWORK = {
 }
 
 RAPID_API_KEY = os.getenv('RAPID_API_KEY')
+
+# Configuration       
+CLOUDINARY_STORAGES = { 
+    'CLOUD_NAME' : "doutyzx6a", 
+    'API_KEY' : os.getenv('CLOUDINARY_API_KEY'), 
+    'API_SECRET' : os.getenv('CLOUDINARY_API_SECRET'),
+    'SECURE' : True,
+}
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
