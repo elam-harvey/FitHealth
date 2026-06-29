@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tab } from './types';
 import { BottomNav } from './components/BottomNav';
 import { LoginScreen } from './screens/LoginScreen';
@@ -17,6 +17,15 @@ import { ProfileScreen } from './screens/ProfileScreen';
 export default function App() {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [currentTab, setCurrentTab] = useState<Tab>('home');
+  const [data, setData] = useState<any>({});
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/workouts/workouts')
+      .then((res) => res.json())
+      .then((data) => setData(data))
+      .catch(error => console.error("Connection failed", error));
+  }, []);
+
 
   const renderScreen = () => {
     if (!isLoggedin) {
