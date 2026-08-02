@@ -20,6 +20,7 @@ class UserProfile(models.Model):
         LOSE = 'lose weight', 'Lose Weight'
         GAIN = 'gain weight', 'Gain Weight'
         MAINTAIN = 'maintain weight', 'Maintain Weight'
+        BUILD_MUSCLE = 'build muscle', 'Build Muscle'
 
     class ActivityChoices(models.TextChoices):
         SEDENTARY = 'sedentary', 'Sedentary'

@@ -1,9 +1,57 @@
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
+import { BASE_URL } from '../config';
+import { on } from 'events';
 
 export function LoginScreen({ onLogin }: { onLogin: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+    setIsLoading(true);
+    setError(""); // Clear any previous error messages
+
+    try {
+      // send a post request to the server with the email and password
+      const response = await fetch(`${BASE_URL}/api/auth/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      // use error message from the server if provided
+      if (!response.ok) {
+        throw new Error(data.details || data.message || 'Invalid credentials');
+      }
+
+      // set the user's token and profile information in local storage
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+
+      console.log('Successfully logged in!');
+
+      onLogin();
+
+    } catch (err: any) {
+      setError(error.message);
+      
+    } finally{
+      setIsLoading(false);
+    }
+
+  }
+      
   return (
     <div className="min-h-screen bg-dark-bg text-white px-6 pt-20 pb-10 flex flex-col">
       <div className="text-center mb-12">
@@ -12,14 +60,25 @@ export function LoginScreen({ onLogin }: { onLogin: () => void }) {
         <p className="text-gray-400 text-sm">Enter your details to access your dashboard.</p>
       </div>
 
-      <div className="space-y-6 flex-1">
+      <form onSubmit={handleLogin} className="space-y-6 flex-1">
+        
+        {/* Error Message Display */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded-xl text-sm text-center">
+            {error}
+          </div>
+        )}
+
         <div className="space-y-2">
           <label className="text-xs font-bold tracking-wider text-gray-400 uppercase">Email</label>
           <div className="relative">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input 
               type="email" 
-              defaultValue="athlete@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="athlete@example.com"
+              required
               className="w-full bg-dark-card border border-dark-border rounded-xl py-4 pl-12 pr-4 outline-none focus:border-neon transition-colors"
             />
           </div>
@@ -31,10 +90,14 @@ export function LoginScreen({ onLogin }: { onLogin: () => void }) {
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input 
               type={showPassword ? 'text' : 'password'} 
-              defaultValue="........"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
               className="w-full bg-dark-card border border-dark-border rounded-xl py-4 pl-12 pr-12 outline-none focus:border-neon transition-colors tracking-widest"
             />
             <button 
+              type="button" 
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
             >
@@ -50,15 +113,16 @@ export function LoginScreen({ onLogin }: { onLogin: () => void }) {
             </div>
             <span className="text-gray-300">Remember me</span>
           </label>
-          <button className="text-neon font-medium">Forgot Password?</button>
+          <button type="button" className="text-neon font-medium">Forgot Password?</button>
         </div>
 
         <button 
-          onClick={onLogin}
-          className="w-full bg-neon text-black font-bold text-lg rounded-xl py-4 flex justify-center items-center space-x-2 hover:bg-[#b0d900] transition-colors mt-8"
+          type="submit" 
+          disabled={isLoading}
+          className="w-full bg-neon text-black font-bold text-lg rounded-xl py-4 flex justify-center items-center space-x-2 hover:bg-[#b0d900] transition-colors mt-8 disabled:opacity-70"
         >
-          <span>Log In</span>
-          <span className="text-xl">→</span>
+          <span>{isLoading ? "Logging in..." : "Log In"}</span>
+          {!isLoading && <span className="text-xl">→</span>}
         </button>
 
         <div className="relative py-8 flex items-center justify-center">
@@ -85,7 +149,8 @@ export function LoginScreen({ onLogin }: { onLogin: () => void }) {
             <span className="font-semibold text-sm">Apple</span>
           </button>
         </div>
-      </div>
+        
+      </form>
 
       <div className="text-center mt-6">
         <p className="text-gray-400 text-sm">

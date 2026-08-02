@@ -1,6 +1,8 @@
 import { TopBar } from '../components/TopBar';
 
+
 export function HomeScreen() {
+
   return (
     <div className="min-h-screen bg-dark-bg pb-24">
       <div className="px-4 py-4 flex justify-between items-center sticky top-0 bg-dark-bg z-40">

@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #
+    # installed apps
     'rest_framework',
     'drf_spectacular',
     'corsheaders',
@@ -56,9 +56,11 @@ INSTALLED_APPS = [
     'Apps.meals',
     'Apps.workouts',
     'Apps.community',
+    'Apps.Dashboard',
     'rest_framework_simplejwt.token_blacklist',
     'cloudinary_storage',
     'cloudinary',
+    
 ]
 
 MIDDLEWARE = [
@@ -196,8 +198,8 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://localhost:3000",
-    "https://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:5173",
 ]
 
 GEMINI_API_KEY = os.getenv('GOOGLE_GEMINI_API_KEY')
@@ -217,7 +219,7 @@ _FRAMEWORK = {
 RAPID_API_KEY = os.getenv('RAPID_API_KEY')
 
 # Configuration       
-CLOUDINARY_STORAGES = { 
+CLOUDINARY_STORAGE = { 
     'CLOUD_NAME' : "doutyzx6a", 
     'API_KEY' : os.getenv('CLOUDINARY_API_KEY'), 
     'API_SECRET' : os.getenv('CLOUDINARY_API_SECRET'),

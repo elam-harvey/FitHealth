@@ -17,14 +17,6 @@ import { ProfileScreen } from './screens/ProfileScreen';
 export default function App() {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [currentTab, setCurrentTab] = useState<Tab>('home');
-  const [data, setData] = useState<any>({});
-
-  useEffect(() => {
-    fetch('http://localhost:8000/api/workouts/workouts')
-      .then((res) => res.json())
-      .then((data) => setData(data))
-      .catch(error => console.error("Connection failed", error));
-  }, []);
 
 
   const renderScreen = () => {

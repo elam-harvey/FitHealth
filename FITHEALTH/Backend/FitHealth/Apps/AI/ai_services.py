@@ -1,19 +1,21 @@
 from django.conf import settings
+import uuid
 from google import genai
 from google.genai import types
 from Apps.workouts.models import Workout, WorkoutPlan, WorkoutPlanItem
 from Apps.meals.models import Meal, MealPlan, MealPlanItem
 from Apps.users.models import UserProfile
+from django.db import transaction
 
-def update_user_profile_metrics(user, current_weight:float=None, target_weight:float=None, goal: str=None) -> str:
+def update_user_profile_metrics(user, current_weight:float, target_weight:float, goal: str) -> str:
     """Update the user's profile with the latest information so as to be able to tweak the plans"""
     try:
         profile = UserProfile.objects.get(user=user)
-        if current_weight is not None:
+        if current_weight != 0.0:
             profile.current_weight = current_weight
-        if target_weight is not None:
+        if target_weight != 0.0:
             profile.target_weight = target_weight
-        if goal is not None:
+        if goal != "":
             profile.goal = goal
         profile.save()
         return "Profile updated successfully."
@@ -21,7 +23,7 @@ def update_user_profile_metrics(user, current_weight:float=None, target_weight:f
         print(f"Error updating profile: {e}")
         return "Failed to update profile due to an error."
 
-def save_generated_plans(user, plan_name: str, exersices: list[dict], meals: list[dict]):
+def save_generated_plans(user, plan_name: str, exercises: list[dict], meals: list[dict]):
     """
     Create and save the generated workout plans and meal plans
 
@@ -30,67 +32,88 @@ def save_generated_plans(user, plan_name: str, exersices: list[dict], meals: lis
         exersices: A list of dictionaries representing individual exercises.
         meals: A list of dictionaries representing individual meals.
     """
+
+    if not exercises and not meals:
+        return "Failed to save plans: No exercises or meals provided."
     try:
-        if not exersices and not meals:
-            return "Failed to save plans: No exercises or meals provided."
-        
-        # 1. Create top-level plan containers
-        new_workout_plan = WorkoutPlan.objects.create(user=user, name=plan_name)  
-        new_meal_plan = MealPlan.objects.create(user=user, name=plan_name)
+        # if any of the code crashes the whole process is undone
+        with transaction.atomic():
+            # 1. Create top-level plan containers
+            new_workout_plan = WorkoutPlan.objects.create(user=user, name=plan_name)  
+            new_meal_plan = MealPlan.objects.create(user=user, name=plan_name)
 
-        # 2. Securely loop through exercises, using .get() to avoid KeyErrors and providing defaults where necessary
-        saved_exersices = 0
-        for item in exersices:
-            workout_id = item.get('workout_id')
-            day = item.get('day', 'monday').lower()  # Default to Monday if not provided
-            time = item.get('time', 'morning').lower()  # Default to Morning if not provided
-                
-            try:
-            # direct database lookup to ensure referential integrity
-                workout_instance = Workout.objects.get(id=workout_id)
-
-                # link the existing catalog row straight to the user's customized schedule line
-                WorkoutPlanItem.objects.create(
-                    workout_plan=new_workout_plan,
-                    workout=workout_instance,
-                    day_of_week=day,
-                    time_of_day=time
-                )
-                saved_exersices += 1
-            except Workout.DoesNotExist:
-                print(f"Workout with ID {workout_id} does not exist. Skipping this exercise.")
-                continue
-             
-            
-        # 3. Save meals cleanly
-        for meal in meals:
-            m_name = meal.get('name') or meal.get('meal_name')
-            if not m_name:
-                continue
-                
-            # Safely check nested 'details' block, fall back to flat item dictionary if missing
-            details = meal.get('details', meal)
-
-            meal_instance, created = Meal.objects.get_or_create(
-                name=m_name.title(),
-                defaults={
-                    'calories': details.get('calories', 0),
-                    'description': details.get('description', 'AI Generated Meal')
-                }
-            )
-
-            try:
-                MealPlanItem.objects.create(
-                    meal_plan=new_meal_plan,
-                    meal=meal_instance,
+            # 2. Securely loop through exercises, using .get() to avoid KeyErrors and providing defaults where necessary
+            saved_exercises = 0
+            for item in exercises:
+                workout_id = item.get('workout_id')
+                day = item.get('day', 'monday').lower()  # Default to Monday if not provided
+                time = item.get('time', 'morning').lower()  # Default to Morning if not provided
                     
-                )
-            except Exception as item_error:
-                print(f"Skipped adding {m_name} to plan due to model mismatch: {item_error}")
-                continue
+                try:
+                # direct database lookup to ensure referential integrity
+                    workout_instance = Workout.objects.get(id=workout_id)
+
+                    # link the existing catalog row straight to the user's customized schedule line
+                    WorkoutPlanItem.objects.create(
+                        workout_plan=new_workout_plan,
+                        workout=workout_instance,
+                        day_of_week=day,
+                        time_of_day=time
+                    )
+                    saved_exercises += 1
+                except Workout.DoesNotExist:
+                    print(f"Workout with ID {workout_id} does not exist. Skipping this exercise.")
+                    continue
             
+                
+                
+            # 3. Save meals cleanly
+            for meal in meals:
+                m_name = meal.get('name') or meal.get('meal_name')
+                if not m_name:
+                    continue
+                    
+                # Safely check nested 'details' block, fall back to flat item dictionary if missing
+                details = meal.get('details', meal)
+                meal_id = details.get('id')
+
+                meal_instance = None
+
+                # If the provided id is matchinh the ones in the db
+                # fetch the meal instead of creating a new one
+                if meal_id:
+                    # use filter().first() so as not get errors of returning two meals
+                    meal_instance = Meal.objects.filter(id=meal_id).first()
+
+                # If no meal was found by the id
+                if not meal_instance:
+                    # check if a meal with the same name already exists in the database
+                    meal_instance = Meal.objects.filter(name=m_name.title()).first()
+
+                # if the meal is new or the name is different
+                if not meal_instance:
+                    # create a new meal and aign it an string id to match the db
+                    new_unique_id = meal_id if meal_id else str(uuid.uuid4())
+
+                    meal_instance = Meal.objects.create(
+                        id=new_unique_id,
+                        name=m_name.title(),
+                        calories=details.get('calories', 0.0),
+                        description=details.get('description', 'AI Generated Meal')
+                    )
+
+                try:
+                    MealPlanItem.objects.update_or_create(
+                        meal_plan=new_meal_plan,
+                        meal=meal_instance,
+                        
+                    )
+                except Exception as item_error:
+                    print(f"Skipped adding {m_name} to plan due to model mismatch: {item_error}")
+                    continue
+                
         return "Plans saved successfully."
-        
+            
     except Exception as e:
         print(f"Error saving plans: {e}")
         return f"Failed to save plans due to an error: {str(e)}"
@@ -152,12 +175,12 @@ class GeminiCoachService:
         try:
             # Tool A: Profile Metric modifier wrapper
 
-            def ai_profile_updater(current_weight:float=None, target_weight:float=None, goal: str=None)-> str:
+            def ai_profile_updater(current_weight: float, target_weight:float, goal: str ) -> str:
                 """Update the profile with the latest user information so as to be able to tweak the plans"""
                 return update_user_profile_metrics(user, current_weight, target_weight, goal)
 
             # Tool B: NEW Plan creation tool
-            def ai_plan_creator(plan_name: str, exersices: list[dict], meals: list[dict]) -> str:
+            def ai_plan_creator(plan_name: str, exercises: list[dict], meals: list[dict]) -> str:
                 """
                 Create and save the generated workout plans and meal plans
 
@@ -170,7 +193,7 @@ class GeminiCoachService:
                             Each dict MUST look like:
                             {'name': str}
                 """
-                return save_generated_plans(user, plan_name, exersices, meals)
+                return save_generated_plans(user, plan_name, exercises, meals)
             
             # define the operational settings bundle
             response = self.client.models.generate_content(

@@ -1,12 +1,13 @@
 from django.db import models
 
-# Create your models here.
+
 class Meal(models.Model):
-    image = models.ImageField(upload_to='meal_images/', null=True, blank=True)
+    id = models.CharField(max_length=255, primary_key=True)
+    image = models.ImageField(max_length=2000, upload_to='meal_images/', null=True, blank=True)
     name = models.CharField(max_length=255)
-    description = models.TextField()
-    calories = models.FloatField()
-    category = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    calories = models.FloatField(blank=True, null=True)
+    category = models.CharField(blank=True, null=True)
     importance = models.CharField(max_length=255)
 
     def __str__(self):

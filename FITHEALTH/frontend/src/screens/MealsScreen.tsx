@@ -1,6 +1,72 @@
 import { TopBar } from '../components/TopBar';
+import { useState, useEffect } from 'react';
+import { BASE_URL } from '../config';
+
+
+interface MealDetails {
+  id: number;
+  image: string | null;
+  name: string | null;
+  description: string | null;
+  calories: number | null;
+  category: string | null;
+  importance: string | null;
+}
+
+interface MealPlanItem {
+  id: number;
+  meal: MealDetails;
+  day_of_week: string;
+  time_of_day: string;
+  meal_plan: number;
+}
+ 
+
+
 
 export function MealsScreen() {
+
+  const [mealItems, setMealItems] = useState<MealPlanItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMeals = async () => {
+      try{
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+          setError('Not logged in. Please log in.');
+          setIsLoading(false);
+          return;
+        }
+
+        // fetch meal items from the backend
+        const response = await fetch(`${BASE_URL}/api/meals/meal-plan-items/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`, 
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok){
+          throw new Error(`Failed to fetch meal items (Status Code: ' + response.status + ')`);
+        }
+        const data = await response.json();
+
+        // Extract meal items from the response
+        const items = Array.isArray(data) ? data : (data.results || []);
+        setMealItems(items);
+        setIsLoading(false);
+      } catch (error) {
+        setError(error.message);
+        setIsLoading(false);
+      }
+    };
+    fetchMeals();
+  }, []);
+
+
   return (
     <div className="min-h-screen bg-dark-bg pb-24">
       <TopBar title="Meal Plans" showAvatar={true} />
@@ -33,29 +99,39 @@ export function MealsScreen() {
           </div>
         </div>
 
-        {/* Meals */}
+        {/* Dynamic Meals */}
         <div className="space-y-6">
-          <MealCard 
-            icon="☀️" title="Breakfast"
-            name="Power Oats & Berries" desc="Quick & Easy prep"
-            kcal="350 kcal" macros="P: 20g | C: 45g | F: 8g"
-            tag="High Protein"
-            img="https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80"
-          />
-          <MealCard 
-            icon="🔅" title="Lunch"
-            name="Ugali & Sukuma Wiki Lean" desc="Added grilled chicken breast"
-            kcal="650 kcal" macros="P: 45g | C: 80g | F: 12g"
-            tag="Local Support"
-            img="https://images.unsplash.com/photo-1548943487-a2e4142f9ed1?auto=format&fit=crop&w=600&q=80"
-          />
-          <MealCard 
-            icon="🌙" title="Dinner"
-            name="Grilled Salmon & Quinoa" desc="Rich in Omega-3"
-            kcal="520 kcal" macros="P: 40g | C: 30g | F: 22g"
-            tag="Low Carb" tagColor="text-blue-400" tagBorder="border-blue-400/30"
-            img="https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80"
-          />
+          {mealItems.length === 0 ? (
+            <div className="text-center text-gray-400 py-8 bg-dark-card rounded-2xl border border-dark-border">
+              No meal plans found for today.
+            </div>
+          ) : (
+            mealItems.map((item, index) => {
+              // Extract the nested meal object
+              const meal = item.meal;
+              
+              // Map Time of Day or fallback to index logic for UI purposes
+              const timeStr = item.time_of_day || (index === 0 ? "Breakfast" : index === 1 ? "Lunch" : "Dinner");
+              const icon = timeStr.toLowerCase().includes("break") ? "☀️" : timeStr.toLowerCase().includes("lunch") ? "🔅" : "🌙";
+
+              // Fallback image for meals like "Healthy Omelette" that have null images
+              const defaultImage = "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=600&q=80";
+
+              return (
+                <MealCard
+                  key={item.id} // using the MealPlanItem ID
+                  icon={icon} 
+                  title={timeStr}
+                  name={meal.name} 
+                  desc={meal.description}
+                  kcal={`${meal.calories} kcal`} 
+                  macros={meal.importance || "Standard Plan"} // Reusing importance field since macros aren't in JSON yet
+                  tag={meal.category || "Plan"}
+                  img={meal.image || defaultImage} 
+                />
+              );
+            })
+          )}
         </div>
 
         {/* Hydration */}

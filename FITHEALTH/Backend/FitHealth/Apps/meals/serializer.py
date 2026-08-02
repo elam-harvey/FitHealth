@@ -8,11 +8,13 @@ class MealSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MealPlanSerializer(serializers.ModelSerializer):
+    meals=MealSerializer(many=True, read_only=True)
     class Meta:
         model = MealPlan
         fields = '__all__'
 
 class MealPlanItemSerializer(serializers.ModelSerializer):
+    meal = MealSerializer(read_only=True)
     class Meta:
         model = MealPlanItem
         fields = '__all__'

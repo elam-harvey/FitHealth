@@ -23,6 +23,8 @@ urlpatterns = [
     path('api/users', include('Apps.users.urls')),
     # Authentication URLs
     path('api/auth/', include('Apps.authentication.urls')),
+    # Dashboard URLs
+    path('api/dashboard/', include('Apps.Dashboard.urls')),
     # Meals URLs
     path('api/meals/', include('Apps.meals.urls')),
     # Workouts URLs

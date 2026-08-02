@@ -36,7 +36,7 @@ class RegisterView(generics.CreateAPIView):
                 'access': str(refresh.access_token),
             }, status=status.HTTP_201_CREATED)
 
-class LogoutView(APIView):
+class LogoutView(generics.CreateAPIView):
     """Handles POST /logout/"""
     @extend_schema(request=None, responses={204: None, 200: None})
     def post(self, request):
@@ -48,8 +48,8 @@ class LogoutView(APIView):
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
-class GoogleLoginView(APIView):
-    """Handles POST /login/ using an authorization code from the frontend"""
+"""class GoogleLoginView(APIView):
+    # Handles POST /login/ using an authorization code from the frontend
 
     def post(self, request):
         # Get the authorization code from the frontend
@@ -108,5 +108,5 @@ class GoogleLoginView(APIView):
 
         except Exception as e:
             return Response({"error": "Invalid authorization code"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        """
         
